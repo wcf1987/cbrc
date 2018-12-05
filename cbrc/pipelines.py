@@ -64,7 +64,7 @@ class cbrcPipeline(object):
         pc.penaltydecision
         pc.organmadepunishment
         pc.Datedecisionpenalty
-
+        pc.id=1
         return pc
     def __insertdata(self,tx,item,spider,res,path):
         """Insert data into the sqlite3 database"""
