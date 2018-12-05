@@ -18,7 +18,7 @@ class cbrcSpy(scrapy.Spider):
         #allFiles = response.xpath('//tr/td/a[re:test(@href,"^\/chinese\/home\/docView\/")]')
         #allFiles = response.xpath('//tr/td/a[starts-with(@href, "/chinese/home/docView/")]')
         allFiles = response.xpath('//table[contains(@id,"testUI")]/tr')
-        for file in allFiles:
+        for file in allFiles[:1]:
             # 分别处理每个连接，取出名称及地址
             item = cbrc.cbrcItem.cbrcItem()
             #print file['data']
