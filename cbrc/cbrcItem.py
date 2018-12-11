@@ -13,5 +13,6 @@ class cbrcItem(scrapy.Item):
     # name = scrapy.Field()
     url = scrapy.Field()
     urltitle = scrapy.Field()
+    level=scrapy.Field()
     #print 123
     pass

@@ -13,11 +13,9 @@ BOT_NAME = 'cbrc'
 
 SPIDER_MODULES = ['cbrc.spiders']
 NEWSPIDER_MODULE = 'cbrc.spiders'
-CBRCLevels=2
+#CBRCLevels=3
 BaseDir= "CBRCresults"
-#startURLs='http://www.cbrc.gov.cn/chinese/home/docViewPage/110002.html'
-startURLs='http://www.cbrc.gov.cn/zhuanti/xzcf/get2and3LevelXZCFDocListDividePage//1.html'
-#startURLs='http://www.cbrc.gov.cn/zhuanti/xzcf/get2and3LevelXZCFDocListDividePage//2.html'
+startURLs=['http://www.cbrc.gov.cn/chinese/home/docViewPage/110002.html','http://www.cbrc.gov.cn/zhuanti/xzcf/get2and3LevelXZCFDocListDividePage//1.html','http://www.cbrc.gov.cn/zhuanti/xzcf/get2and3LevelXZCFDocListDividePage//2.html']
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'cbrc (+http://www.yourdomain.com)'
