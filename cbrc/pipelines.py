@@ -8,7 +8,8 @@ import urllib2
 import os
 from scrapy import log
 from twisted.enterprise import adbapi
-
+import MySQLdb
+import MySQLdb.cursors
 import time
 import sqlite3
 from cbrc.punishcontent import punishcontent
@@ -21,9 +22,19 @@ import  settings
 class cbrcPipeline(object):
     def __init__(self):
         """Initialize"""
-        self.__dbpool = adbapi.ConnectionPool('sqlite3',
-                database=os.getcwd()+'/cbrc/database/cbrcpunish.db',
-                check_same_thread=False)
+        #self.__dbpool = adbapi.ConnectionPool('sqlite3',
+        #        database=os.getcwd()+'/cbrc/database/cbrcpunish.db',
+        #        check_same_thread=False)
+        dbargs = dict(
+            host='localhost',
+            db='cbrcpunish',
+            user='root',  # replace with you user name
+            passwd='',  # replace with you password
+            charset='utf8',
+            cursorclass=MySQLdb.cursors.DictCursor,
+            use_unicode=True,
+        )
+        self.dbpool = adbapi.ConnectionPool('MySQLdb', **dbargs)
     def shutdown(self):
         """Shutdown the connection pool"""
         self.__dbpool.close()
@@ -41,36 +52,43 @@ class cbrcPipeline(object):
                 fp.write(htmltext)
             print u"保存文件："+file_name
         else:
-            #f = open(file_name, 'r')
-            #htmltext = f.read()
+            f = open(file_name, 'r')
+            htmltext = f.read()
             pass
-        #query = self.__dbpool.runInteraction(self.__insertdata, item, spider,htmltext,file_name)
-        #query.addErrback(self.handle_error)
+        query = self.dbpool.runInteraction(self.__insertdata, item,htmltext,file_name)
+        query.addErrback(self.handle_error)
         return item
+
+
+
+
 
 
     def checkfileExists(self,filepath):
         return os.path.exists(filepath)
 
-    def __insertdata(self,tx,item,spider,res,path):
+    def __insertdata(self,tx,item,res,path):
         """Insert data into the sqlite3 database"""
-        spidername=spider.name
+        #spidername=spider.name
         title=item['urltitle']
-
-        tx.execute("select * from punishlist where Punishfilename = ?", (title,))
-        result = tx.fetchone()
+        try:
+            sql="select * from punishlist where Punishfilename = '%s'" % (title)
+            tx.execute(sql)
+            result = tx.fetchone()
+        except Exception  as e:
+            print e.message
         if result:
             #print u"已插入记录：" + title
             #log.msg("Already exists in database", level=log.DEBUG)
             pass
         else:
-            print u"开始解析记录：" + title
+            #print u"开始解析记录：" + title
             #if title <> u'中国银监会行政处罚信息公开表（银监罚决字〔2017〕25号）':
                 #return
-            pc=self.parseHTMLByTEXT(res,title,path)
+            pc=self.parseHTMLByTAG(res,title,path)
             try:
-                tx.execute(\
-                            "insert into punishlist(Punishfilename, localpath, DocumentNumber, PersonName, OrgName,Legalrepresentative,Causeofaction,Basisforpunishment,penaltydecision,organmadepunishment,Datedecisionpenalty,Levels) values (?,?,?,?,?,?,?,?,?,?,?,?)",(
+                pc.localpath=pc.localpath.replace('\\','/')
+                sql="insert into punishlist(Punishfilename, localpath, DocumentNumber, PersonName, OrgName,Legalrepresentative,Causeofaction,Basisforpunishment,penaltydecision,organmadepunishment,Datedecisionpenalty,Levels,id) values ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s',%d,%d)" %(
                         pc.Punishfilename,
                         pc.localpath ,
                         pc.DocumentNumber ,
@@ -82,8 +100,9 @@ class cbrcPipeline(object):
                         pc.penaltydecision ,
                         pc.organmadepunishment ,
                         pc.Datedecisionpenalty ,
-                        pc.levels
-                                        ))
+                        item['level'],
+                        0 )
+                tx.execute(sql)
                 print u"插入记录："+pc.Punishfilename
                 #log.msg("Item stored in db", level=log.DEBUG)
             except Exception  as e:
@@ -91,6 +110,65 @@ class cbrcPipeline(object):
     def handle_error(self,e):
         pass
         #.err(e)
+
+    def parseHTMLByTAG(self, res, title, path):
+        pc=punishcontent()
+        pc.Punishfilename=title
+        pc.localpath=path
+        soup = BeautifulSoup(res, "html.parser")
+        s1 = soup.find("table", attrs={"class": "MsoNormalTable"})
+
+        s2=s1.find_all("tr")
+        strlist=[]
+        for i in s2:
+            s3=i.find_all("td")
+            strline=[]
+            for j in s3:
+                strs=j.get_text().strip()
+                strline.append(strs)
+            strlist.append(strline)
+        if len(strlist)<8:
+            return pc
+        #print strlist
+        if title.find(u"大银监罚决字")>-1:
+            print title
+        z=0
+        for k in xrange(10):
+            if strlist[z][0].find(u"文号")<0:
+                z=z+1
+            else:
+                break
+        pc.DocumentNumber = strlist[z][-1]
+
+        pc.PersonName =strlist[z+1][-1]
+
+
+        if strlist[z+2][-2].find(u"单位")>-1:
+            z = z + 1
+            if len(strlist[z + 1][-1])>=len(strlist[z + 2][-1]):
+                pc.OrgName = strlist[z + 1][-1]
+            else:
+                pc.OrgName = strlist[z + 2][-1]
+        else:
+            pc.OrgName = strlist[z + 2][-1]
+
+        pc.Legalrepresentative =strlist[z+3][-1]
+
+
+        pc.Causeofaction =strlist[z+4][-1]
+
+
+        pc.Basisforpunishment =strlist[z+5][-1]
+
+        pc.penaltydecision = strlist[z+6][-1]
+
+        pc.organmadepunishment = strlist[z+7][-1]
+
+
+        pc.Datedecisionpenalty = strlist[z+8][-1]
+        return pc
+
+
     def parseHTML(self,res,title,path):
         pc=punishcontent()
         pc.Punishfilename=title
@@ -140,7 +218,7 @@ class cbrcPipeline(object):
         s1 = soup.find("span", text=["作出处罚决定的日期"])
         s2 = s1.parent.parent.next_sibling
         pc.Datedecisionpenalty=s2.get_text().strip()
-        pc.levels=settings.CBRCLevels
+
         return pc
 
     def parseHTMLByTEXT(self,res,title,path):
@@ -189,5 +267,5 @@ class cbrcPipeline(object):
 
 
         pc.Datedecisionpenalty = resultsText[8]
-        pc.levels = settings.CBRCLevels
+ 
         return pc

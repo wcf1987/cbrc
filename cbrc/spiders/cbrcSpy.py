@@ -18,11 +18,11 @@ class cbrcSpy(scrapy.Spider):
     url_set = set()
     def checkLevel(self,url):
         if url.find("110002.html")>-1:
-            return '1'
+            return 1
         if url.find("//1.html")>-1:
-            return '2'
+            return 2
         if url.find("//2.html")>-1:
-            return '3'
+            return 3
         return '4'
 
     def parse(self, response):

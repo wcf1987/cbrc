@@ -12,5 +12,5 @@ class punishcontent():
         self.organmadepunishment=''
         self.Datedecisionpenalty=''
         self.id=0
-        self.levels=1
+
     pass

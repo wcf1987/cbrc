@@ -13,6 +13,9 @@ BOT_NAME = 'cbrc'
 
 SPIDER_MODULES = ['cbrc.spiders']
 NEWSPIDER_MODULE = 'cbrc.spiders'
+ITEM_PIPELINES = {
+    'cbrc.pipelines.cbrcPipeline': 300,
+}
 #CBRCLevels=3
 BaseDir= "CBRCresults"
 startURLs=['http://www.cbrc.gov.cn/chinese/home/docViewPage/110002.html','http://www.cbrc.gov.cn/zhuanti/xzcf/get2and3LevelXZCFDocListDividePage//1.html','http://www.cbrc.gov.cn/zhuanti/xzcf/get2and3LevelXZCFDocListDividePage//2.html']
@@ -66,9 +69,7 @@ ROBOTSTXT_OBEY = True
 
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-ITEM_PIPELINES = {
-    'cbrc.pipelines.cbrcPipeline': 300,
-}
+
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
