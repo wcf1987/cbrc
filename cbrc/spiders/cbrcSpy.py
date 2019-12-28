@@ -27,14 +27,17 @@ class cbrcSpy(scrapy.Spider):
 
     def parse(self, response):
         # 获取所有图片的a标签
+        #print ('cbrcSpy')
         #allFiles = response.xpath('//tr/td/a[re:test(@href,"^\/chinese\/home\/docView\/")]')
         #allFiles = response.xpath('//tr/td/a[starts-with(@href, "/chinese/home/docView/")]')
-        allFiles = response.xpath('//table[contains(@id,"testUI")]/tr')
+        #allFiles = response.xpath('//table[contains(@id,"testUI")]/tr')
+        allFiles = response.xpath('//table')
         level=self.checkLevel(response.url)
+        print (response.text)
         for file in allFiles:
             # 分别处理每个连接，取出名称及地址
             item = cbrc.cbrcItem.cbrcItem()
-            #print file['data']
+            print (file['data'])
             #print file.xpath('./td/a/@href').extract()
             if(len(file.xpath('./td/input').extract())==0):
 

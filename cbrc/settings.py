@@ -17,6 +17,9 @@ ITEM_PIPELINES = {
     'cbrc.pipelines.cbrcPipeline': 300,
 }
 #CBRCLevels=3
+#LOG_LEVEL = 'WARNING'
+LOG_LEVEL = 'INFO'
+HTTPERROR_ALLOWED_CODES = [555]
 BaseDir= "CBRCresults"
 startURLs=['http://www.cbrc.gov.cn/chinese/home/docViewPage/110002.html','http://www.cbrc.gov.cn/zhuanti/xzcf/get2and3LevelXZCFDocListDividePage//1.html','http://www.cbrc.gov.cn/zhuanti/xzcf/get2and3LevelXZCFDocListDividePage//2.html']
 

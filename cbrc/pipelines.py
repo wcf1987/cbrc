@@ -4,12 +4,12 @@
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-import urllib2
+import urllib
 import os
-from scrapy import log
+
 from twisted.enterprise import adbapi
-import MySQLdb
-import MySQLdb.cursors
+import pymysql
+import pymysql.cursors
 import time
 import sqlite3
 from cbrc.punishcontent import punishcontent
@@ -18,9 +18,10 @@ from lxml import etree
 import sys
 import re
 from bs4 import BeautifulSoup
-import  settings
+#import settings
 class cbrcPipeline(object):
     def __init__(self):
+        print('pipelines init')
         """Initialize"""
         #self.__dbpool = adbapi.ConnectionPool('sqlite3',
         #        database=os.getcwd()+'/cbrc/database/cbrcpunish.db',
@@ -31,32 +32,35 @@ class cbrcPipeline(object):
             user='root',  # replace with you user name
             passwd='',  # replace with you password
             charset='utf8',
-            cursorclass=MySQLdb.cursors.DictCursor,
+            cursorclass=pymysql.cursors.DictCursor,
             use_unicode=True,
         )
-        self.dbpool = adbapi.ConnectionPool('MySQLdb', **dbargs)
+
+        self.dbpool = adbapi.ConnectionPool('pymysql', **dbargs)
+
     def shutdown(self):
         """Shutdown the connection pool"""
         self.__dbpool.close()
     def process_item(self, item, spider):
-
+        print ('test2')
         file_name = os.path.join(u'',os.getcwd(),'cbrc',settings.BaseDir,str(item['level']),item['urltitle'].strip()+'.html')
         htmltext=""
+        print(file_name)
         if not self.checkfileExists(file_name):
             headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:52.0) Gecko/20100101 Firefox/52.0'}
-            req = urllib2.Request(url=item['url'], headers=headers)
-            res = urllib2.urlopen(req)
+            req = urllib.Request(url=item['url'], headers=headers)
+            res = urllib.request.urlopen(req)
             htmltext = res.read()
             htmltext = htmltext.replace('charset=gb2312', 'charset=utf-8')
             with open(file_name,'wb') as fp:
                 fp.write(htmltext)
-            print u"保存文件："+file_name
+            print (u"保存文件："+file_name)
         else:
             f = open(file_name, 'r')
             htmltext = f.read()
             pass
-        query = self.dbpool.runInteraction(self.__insertdata, item,htmltext,file_name)
-        query.addErrback(self.handle_error)
+        #query = self.dbpool.runInteraction(self.__insertdata, item,htmltext,file_name)
+        #query.addErrback(self.handle_error)
         return item
 
 
@@ -76,7 +80,7 @@ class cbrcPipeline(object):
             tx.execute(sql)
             result = tx.fetchone()
         except Exception  as e:
-            print e.message
+            print (e.message)
         if result:
             #print u"已插入记录：" + title
             #log.msg("Already exists in database", level=log.DEBUG)
@@ -103,10 +107,10 @@ class cbrcPipeline(object):
                         item['level'],
                         0 )
                 tx.execute(sql)
-                print u"插入记录："+pc.Punishfilename
+                print (u"插入记录："+pc.Punishfilename)
                 #log.msg("Item stored in db", level=log.DEBUG)
             except Exception  as e:
-                print e.message
+                print (e.message)
     def handle_error(self,e):
         pass
         #.err(e)
@@ -131,7 +135,7 @@ class cbrcPipeline(object):
             return pc
         #print strlist
         if title.find(u"大银监罚决字")>-1:
-            print title
+            print (title)
         z=0
         for k in xrange(10):
             if strlist[z][0].find(u"文号")<0:
