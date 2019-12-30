@@ -16,6 +16,7 @@ class cbrcSpy(scrapy.Spider):
     # 初始URL
     start_urls = startURLs
     url_set = set()
+    #print (start_urls)
     def checkLevel(self,url):
         if url.find("110002.html")>-1:
             return 1
@@ -31,9 +32,11 @@ class cbrcSpy(scrapy.Spider):
         #allFiles = response.xpath('//tr/td/a[re:test(@href,"^\/chinese\/home\/docView\/")]')
         #allFiles = response.xpath('//tr/td/a[starts-with(@href, "/chinese/home/docView/")]')
         #allFiles = response.xpath('//table[contains(@id,"testUI")]/tr')
+        #response.text
+        print(response.text)
         allFiles = response.xpath('//table')
         level=self.checkLevel(response.url)
-        print (response.text)
+
         for file in allFiles:
             # 分别处理每个连接，取出名称及地址
             item = cbrc.cbrcItem.cbrcItem()

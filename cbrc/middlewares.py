@@ -78,6 +78,11 @@ class CbrcDownloaderMiddleware(object):
         # - or return a Request object
         # - or raise IgnoreRequest: process_exception() methods of
         #   installed downloader middleware will be called
+#修改ua
+        request.headers['Accept'] = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"
+        request.headers["Accept-Encoding"] = "gzip, deflate"
+        request.headers["Accept-Language"] = "zh-CN,zh;q=0.9"
+        request.headers['User-Agent']="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36"
         return None
 
     def process_response(self, request, response, spider):

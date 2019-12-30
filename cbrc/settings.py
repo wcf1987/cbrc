@@ -19,10 +19,10 @@ ITEM_PIPELINES = {
 #CBRCLevels=3
 #LOG_LEVEL = 'WARNING'
 LOG_LEVEL = 'INFO'
-HTTPERROR_ALLOWED_CODES = [555]
+HTTPERROR_ALLOWED_CODES = [555,521]
 BaseDir= "CBRCresults"
 startURLs=['http://www.cbrc.gov.cn/chinese/home/docViewPage/110002.html','http://www.cbrc.gov.cn/zhuanti/xzcf/get2and3LevelXZCFDocListDividePage//1.html','http://www.cbrc.gov.cn/zhuanti/xzcf/get2and3LevelXZCFDocListDividePage//2.html']
-
+#'http://httpbin.org/get',
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'cbrc (+http://www.yourdomain.com)'
 
@@ -60,9 +60,9 @@ ROBOTSTXT_OBEY = True
 
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
-#DOWNLOADER_MIDDLEWARES = {
-#    'cbrc.middlewares.CbrcDownloaderMiddleware': 543,
-#}
+DOWNLOADER_MIDDLEWARES = {
+    'cbrc.middlewares.CbrcDownloaderMiddleware': 543,
+}
 
 # Enable or disable extensions
 # See https://doc.scrapy.org/en/latest/topics/extensions.html
